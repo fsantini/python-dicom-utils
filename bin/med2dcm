@@ -1,0 +1,42 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Tue May 26 15:24:55 2020
+
+@author: francesco
+"""
+
+import sys
+import os.path
+
+from dicomUtils.dicom3D import load3dDicom, save3dDicom
+from med2npy import loadMed
+
+medFile = sys.argv[1]
+dcmIn = sys.argv[2]
+try:
+    scaleFactor = float(sys.argv[3])
+except:
+    scaleFactor = None
+
+dcmData, dcmInfo = load3dDicom(dcmIn)
+medData = loadMed(medFile)
+
+origPath = os.path.abspath(medFile)
+path, file = os.path.split(medFile)
+basename, ext = os.path.splitext(file)
+if not ext: basename += '_'
+
+if scaleFactor is not None:
+    medData *= scaleFactor
+elif medData.max() < 2:
+    medData *= 1000
+
+medData[medData < 0] = 0
+medData[medData >= 2**12] = (2**12-1)
+
+outputPath = os.path.join(path, basename)
+if dcmData.shape != medData.shape:
+    print('Size mismatch: dicom: {}, med: {}'.format(dcmData.shape, medData.shape))
+else:
+    save3dDicom(medData, dcmInfo, outputPath)

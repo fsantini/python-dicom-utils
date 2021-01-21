@@ -1,0 +1,17 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Oct 17 10:09:31 2019
+
+@author: francesco
+"""
+
+import os.path 
+import sys
+import numpy as np
+from dicomUtils.io import loadMed
+
+if __name__ == '__main__':
+    origPath = sys.argv[1]
+    arr = loadMed(origPath)
+    np.save(baseName + '.npy', arr)

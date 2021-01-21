@@ -1,0 +1,30 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Oct 17 10:09:31 2019
+
+@author: francesco
+"""
+
+from dicomUtils.dicom3D import load3dDicom
+import os.path 
+import sys
+import numpy as np
+import nibabel as nib
+
+origPath = os.path.abspath(sys.argv[1])
+baseName, ext = os.path.splitext(origPath)
+
+if not os.path.isdir(origPath):
+    origPath, file = os.path.split(origPath)
+
+arr, info = load3dDicom(origPath)
+
+if len(sys.argv) > 2:
+    transpose = np.array( [ int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]) ], dtype = np.int8)
+    arr = np.transpose(arr, np.abs(transpose)-1)
+    for ax, val in enumerate(transpose):
+        if val < 0:
+            arr = np.flip(arr, axis = ax)
+
+np.save(baseName + '.npy', arr)
